@@ -1,3 +1,5 @@
+var continueTimer = true;
+
 function startTimer() {
   var display = document.querySelector("#time");
   var timer = 60 * 4,
@@ -5,6 +7,11 @@ function startTimer() {
     minutes,
     seconds;
   var timerInterval = setInterval(function () {
+    if (!continueTimer) {
+      display.textContent = "04:00";
+      clearInterval(timerInterval);
+      return;
+    }
     // runs function every 1000ms to change timer display
     minutes = parseInt(timer / 60, 10);
     seconds = parseInt(timer % 60, 10);
@@ -133,6 +140,7 @@ function playTimerSound() {
 }
 
 function play() {
+  continueTimer = true;
   playShakeSound();
   showGridShake();
   changeButton();
@@ -152,7 +160,24 @@ function changeButton() {
   var playBtn = document.getElementById("play");
   if (playBtn.innerText == "Play!") {
     playBtn.innerText = "Stop";
+    playBtn.onclick = stopGame;
   } else if (playBtn.innerText == "Stop") {
     playBtn.innerText = "Play!";
+    playBtn.onclick = play;
   }
+}
+
+function stopGame() {
+  //clear timer
+  continueTimer = false;
+  document.querySelector("#time").textContent = "04:00";
+
+  //clear grid
+  for (var i = 0; i < 36; i++) {
+    var id = "tile" + i;
+    document.getElementById(id).textContent = "";
+  }
+
+  //change button back
+  changeButton();
 }

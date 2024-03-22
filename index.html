@@ -48,11 +48,47 @@
               <a
                 class="nav-link"
                 data-bs-toggle="modal"
-                data-bs-target="#exampleModal"
+                data-bs-target="#rulesModal"
+                style="cursor: pointer;"
                 >Rules</a
               >
             </li>
-          </ul>
+            <li class="nav-item">
+              <a
+              class="nav-link"
+              data-bs-toggle="modal"
+              data-bs-target="#wordCheckerModal"
+              style="cursor: pointer;"
+              >Word Checker</a
+            >
+            </li>
+            <li class="nav-item dropdown">
+              <div>
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Options
+              </a>
+              <div class="dropdown-menu" aria-labelledby="navbarDropdown" data-bs-theme="light">
+                  <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" role="switch" id="switchShakingAudio" checked>
+                    <label class="form-check-label" for="switchShakingAudio">Play shaking sounds</label>
+                  </div>
+                  <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" role="switch" id="switchTimerAudio" checked>
+                    <label class="form-check-label" for="switchTimerAudio">Play timer beeping</label>
+                  </div>
+                <div class="dropdown-divider"></div>
+                <div class="form-check form-switch">
+                  <input class="form-check-input" type="checkbox" role="switch" id="switchDarkMode">
+                  <label class="form-check-label" for="switchDarkMode">Dark mode</label>
+                </div>
+                <div class="form-check form-switch">
+                  <input class="form-check-input" type="checkbox" role="switch" id="switchGridShake" checked>
+                  <label class="form-check-label" for="switchGridShake">Show grid shaking</label>
+                </div>
+              </div>
+              </div>
+            </li>
+        </ul>
         </div>
       </nav>
     </header>
@@ -155,8 +191,7 @@
            </div>
           </div>
 
-
-        <div>
+        <div id="pointsTbl">
           <table class="table">
             <tr>
               <th>Length</th>
@@ -178,7 +213,9 @@
             </tr>
           </table>
         </div>
+
       </div>
+      
     </main>
 
     <footer></footer>
@@ -186,21 +223,21 @@
     <!-- RULES MODAL -->
     <div
       class="modal fade"
-      id="exampleModal"
+      id="rulesModal"
       tabindex="-1"
-      aria-labelledby="exampleModalLabel"
+      aria-labelledby="rulesModalLabel"
       aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <h1 class="modal-title fs-5" id="exampleModalLabel">Rules</h1>
+            <h1 class="modal-title fs-5" id="rulesModalLabel">Rules</h1>
             <button
               type="button"
               class="btn-close"
               data-bs-dismiss="modal"
               aria-label="Close"></button>
           </div>
-          <div class="modal-body">
+          <div class="modal-body text-left">
             <p>
               When the timer starts, each player searches the assortment of
               letters for words of four letters or more. When you find a word,
@@ -219,9 +256,37 @@
               formed using the "?".
             </p>
             <p>
+              When time is up, players take turns reading off the words in their lists.
+              If two or more players wrote the same word, all players remove it from their lists.
+              </p>
+              <p>
+              Once all players have read their lists, the remaining words are scored according to the table below.
+              The player with the highest score wins the round.
+            </p>
+            <p>
               Proper nouns, abbreviations, contractions, hyphenated words, and
               foreign words that are not in an English dictionary are
               <strong>not allowed</strong>.
+              <table class="table">
+                <tr>
+                  <th>Length</th>
+                  <th>4</th>
+                  <th>5</th>
+                  <th>6</th>
+                  <th>7</th>
+                  <th>8</th>
+                  <th>9+</th>
+                </tr>
+                <tr>
+                  <td>Points</td>
+                  <td>1</td>
+                  <td>2</td>
+                  <td>3</td>
+                  <td>5</td>
+                  <td>11</td>
+                  <td>2 per letter</td>
+                </tr>
+              </table>
             </p>
           </div>
           <div class="modal-footer">
@@ -234,6 +299,53 @@
           </div>
         </div>
       </div>
+    </div>
+
+    <!-- WORD CHECKER MODAL -->
+    <div
+        class="modal fade"
+        id="wordCheckerModal"
+        tabindex="-1"
+        aria-labelledby="wordCheckerLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5" id="wordCheckerLabel">Word Checker</h1>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <div>
+                <p>If a word is challenged, use this tool to check the dictionary.</p>
+                <form>
+             <label for="inputWord">Enter word to check:</label>
+             <input class="form-control" type="text" id="inputWord">
+             </div>
+             <div>
+             <p id="checkedWordText">Word is a valid word.</p>
+             </div>
+            </div>
+            <div class="modal-footer">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                data-bs-dismiss="modal">
+                Close
+              </button>
+              <button
+              type="submit"
+              class="btn btn-primary"
+              onclick="checkWord()">
+              Check Word
+            </button>
+          </form>
+            </div>
+          </div>
+        </div>
     </div>
 
     <!-- BOOTSTRAP/SCRIPT  -->

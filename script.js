@@ -1,8 +1,9 @@
 //global variables
 var continueTimer = true;
-var shakeSoundEnabled = true;
-var timerSoundEnabled = true;
-var gridShakeEnabled = true;
+var shakeSoundEnabled = { val: true };
+var timerSoundEnabled = { val: true };
+var gridShakeEnabled = { val: true };
+var darkModeEnabled = { val: false };
 
 function startTimer() {
 	var display = document.querySelector("#time");
@@ -28,7 +29,7 @@ function startTimer() {
 		if (--timer < 0) {
 			//Stop after timer reaches 0
 			clearInterval(timerInterval);
-			if (timerSoundEnabled) {
+			if (timerSoundEnabled.val) {
 				playTimerSound();
 			}
 			changeButton();
@@ -142,7 +143,8 @@ function playTimerSound() {
 
 function play() {
 	continueTimer = true;
-	if (shakeSoundEnabled) {
+	if (shakeSoundEnabled.val && gridShakeEnabled.val) {
+		//prevents shake sound from playing if grid shaking is off
 		playShakeSound();
 	}
 	showGridShake();
@@ -152,7 +154,7 @@ function play() {
 
 function showGridShake() {
 	// Shuffles grid while sound plays
-	if (gridShakeEnabled) {
+	if (gridShakeEnabled.val) {
 		var id = window.setInterval(newGrid, 200);
 		window.setTimeout(function () {
 			window.clearInterval(id);
@@ -189,11 +191,18 @@ function stopGame() {
 }
 
 function checkWord() {
-	//if (wordToCheck.length < 4) {
-	//var resultText = "Word must be at least 4 characters.";
-	//} else {
-	callAPI("test");
-	//}
+	var inputWord = document.getElementById("inputWord");
+	var word = inputWord.value;
+	if (word.length < 4) {
+		var resultText = "Word must be at least 4 characters.";
+		var resultColor = "red";
+		var element = document.getElementById("resultText");
+		element.innerHTML = resultText;
+		element.style.color = resultColor;
+	} else {
+		callAPI(word);
+	}
+	clearWord();
 }
 
 function callAPI(word) {
@@ -202,17 +211,81 @@ function callAPI(word) {
 
 	var response = fetch(apiURL, {
 		method: "GET",
-	})
-		.then((response) => response.json())
-		.then(function (response) {
-			console.log(response);
-		});
+	}).then(function (response, word) {
+		var word = word;
+		if (response.status == 200) {
+			var resultText = `Word is a valid word.`;
+			var resultColor = "green";
+		} else if (response.status == 404) {
+			var resultText = `Word is not a valid word.`;
+			var resultColor = "red";
+		} else {
+			var resultText = `We encountered an error. Please try again`;
+			var resultColor = "red";
+		}
+		var element = document.getElementById("resultText");
+		element.innerHTML = resultText;
+		element.style.color = resultColor;
+	});
 }
 
-function giveResult(wordValid, word) {
-	if (wordValid) {
-		var resultText = `$(word) is a valid word.`;
+function clearWord() {
+	var inputWord = document.getElementById("inputWord");
+	inputWord.value = "";
+}
+
+function clearWordChecker() {
+	clearWord();
+	var resultText = document.getElementById("resultText");
+	resultText.innerHTML = "";
+}
+
+function modalListener() {
+	const modal = document.getElementById("wordCheckerModal");
+	modal.addEventListener("hide.bs.modal", (event) => clearWordChecker());
+}
+
+function addListeners() {
+	modalListener();
+	switchListeners();
+	gridShakeSwitchListener();
+}
+
+function switchListeners() {
+	const switchIDs = [
+		"switchShakingAudio",
+		"switchTimerAudio",
+		"switchDarkMode",
+	];
+
+	for (let i = 0; i < switchIDs.length; i++) {
+		let switchElement = document.getElementById(switchIDs[i]);
+		switchElement.addEventListener("change", (event) =>
+			changeVars(i, switchElement)
+		);
+	}
+}
+
+function changeVars(i, switchElement) {
+	var variables = [shakeSoundEnabled, timerSoundEnabled, darkModeEnabled];
+	variables[i].val = switchElement.checked;
+}
+
+function gridShakeSwitchListener() {
+	let switchElement = document.getElementById("switchGridShake");
+	switchElement.addEventListener("change", (event) =>
+		changeGridVars(switchElement)
+	);
+}
+function changeGridVars(switchElement) {
+	var switchShakingAudio = document.getElementById("switchShakingAudio");
+	if (switchElement.checked) {
+		gridShakeEnabled.val = true;
+		switchShakingAudio.disabled = false;
+		switchShakingAudio.checked = shakeSoundEnabled.val;
 	} else {
-		var resultText = `$(word) is not a valid word.`;
+		gridShakeEnabled.val = false;
+		switchShakingAudio.checked = false;
+		switchShakingAudio.disabled = true;
 	}
 }

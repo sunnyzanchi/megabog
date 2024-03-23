@@ -33,9 +33,16 @@
         color: white;
       }
     </style>
+        <!-- BOOTSTRAP/SCRIPT  -->
+        <script
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+        crossorigin="anonymous"></script>
+      <script src="script.js"></script>
+
   </head>
 
-  <body>
+  <body onload="addListeners()">
     <header>
       <nav class="navbar navbar-expand-lg bg-primary" data-bs-theme="dark">
         <div class="container-fluid">
@@ -68,21 +75,22 @@
                 Options
               </a>
               <div class="dropdown-menu" aria-labelledby="navbarDropdown" data-bs-theme="light">
+                <div class="container">
                   <div class="form-check form-switch">
-                    <input class="form-check-input" type="checkbox" role="switch" id="switchShakingAudio" checked>
+                    <input class="form-check-input" autocomplete="off" type="checkbox" role="switch" id="switchShakingAudio" checked>
                     <label class="form-check-label" for="switchShakingAudio">Play shaking sounds</label>
                   </div>
                   <div class="form-check form-switch">
-                    <input class="form-check-input" type="checkbox" role="switch" id="switchTimerAudio" checked>
+                    <input class="form-check-input" autocomplete="off" type="checkbox" role="switch" id="switchTimerAudio" checked>
                     <label class="form-check-label" for="switchTimerAudio">Play timer beeping</label>
                   </div>
                 <div class="dropdown-divider"></div>
                 <div class="form-check form-switch">
-                  <input class="form-check-input" type="checkbox" role="switch" id="switchDarkMode">
+                  <input class="form-check-input" autocomplete="off" type="checkbox" role="switch" id="switchDarkMode">
                   <label class="form-check-label" for="switchDarkMode">Dark mode</label>
                 </div>
                 <div class="form-check form-switch">
-                  <input class="form-check-input" type="checkbox" role="switch" id="switchGridShake" checked>
+                  <input class="form-check-input" autocomplete="off" type="checkbox" role="switch" id="switchGridShake" checked>
                   <label class="form-check-label" for="switchGridShake">Show grid shaking</label>
                 </div>
               </div>
@@ -319,14 +327,21 @@
                 aria-label="Close"></button>
             </div>
             <div class="modal-body">
-              <div>
+                <div>
                 <p>If a word is challenged, use this tool to check the dictionary.</p>
+              </div>
+              <div>
                 <form>
              <label for="inputWord">Enter word to check:</label>
-             <input class="form-control" type="text" id="inputWord">
+             <div class="input-group mb-3">
+             <input autocomplete=off class="form-control border-end-0" type="text" id="inputWord">
+             <button class="btn border border-start-0" type="button" onclick="clearWord()"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+              <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
+            </svg></button>
+             </div>
              </div>
              <div>
-             <p id="checkedWordText">Word is a valid word.</p>
+             <p class="text-center" id="resultText"></p>
              </div>
             </div>
             <div class="modal-footer">
@@ -337,7 +352,7 @@
                 Close
               </button>
               <button
-              type="submit"
+              type="button"
               class="btn btn-primary"
               onclick="checkWord()">
               Check Word
@@ -348,11 +363,6 @@
         </div>
     </div>
 
-    <!-- BOOTSTRAP/SCRIPT  -->
-    <script
-      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
-      integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
-      crossorigin="anonymous"></script>
-    <script src="script.js"></script>
+
   </body>
 </html>

@@ -4,6 +4,7 @@ var shakeSoundEnabled = { val: true };
 var timerSoundEnabled = { val: true };
 var gridShakeEnabled = { val: true };
 var darkModeEnabled = { val: false };
+var timerDisplayEnabled = { val: true };
 
 function startTimer() {
 	var display = document.querySelector("#time");
@@ -185,7 +186,6 @@ function stopGame() {
 		var id = "tile" + i;
 		document.getElementById(id).textContent = "";
 	}
-
 	//change button back
 	changeButton();
 }
@@ -193,8 +193,12 @@ function stopGame() {
 function checkWord() {
 	var inputWord = document.getElementById("inputWord");
 	var word = inputWord.value;
-	if (word.length < 4) {
-		var resultText = "Word must be at least 4 characters.";
+	if (!word.match("[a-z]{4,}")) {
+		// disallow words < 4 chars, spaces, apostrophes, and foreign characters
+		var resultText = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle" viewBox="0 0 16 16">
+		<path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+		<path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
+	  </svg>Word is not a valid word.`;
 		var resultColor = "red";
 		var element = document.getElementById("resultText");
 		element.innerHTML = resultText;
@@ -214,10 +218,16 @@ function callAPI(word) {
 	}).then(function (response, word) {
 		var word = word;
 		if (response.status == 200) {
-			var resultText = `Word is a valid word.`;
+			var resultText = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-circle" viewBox="0 0 16 16">
+			<path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+			<path d="m10.97 4.97-.02.022-3.473 4.425-2.093-2.094a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-1.071-1.05"/>
+		  </svg> Word is a valid word.`;
 			var resultColor = "green";
 		} else if (response.status == 404) {
-			var resultText = `Word is not a valid word.`;
+			var resultText = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle" viewBox="0 0 16 16">
+			<path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+			<path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
+		  </svg>Word is not a valid word.`;
 			var resultColor = "red";
 		} else {
 			var resultText = `We encountered an error. Please try again`;
@@ -227,6 +237,23 @@ function callAPI(word) {
 		element.innerHTML = resultText;
 		element.style.color = resultColor;
 	});
+}
+
+//not used
+function parseResponse(response, word) {
+	if (response.status == 200) {
+		var resultText = `${word} is a valid word.`;
+		var resultColor = "green";
+	} else if (response.status == 404) {
+		var resultText = `${word} is not a valid word.`;
+		var resultColor = "red";
+	} else {
+		var resultText = `We encountered an error. Please try again`;
+		var resultColor = "red";
+	}
+	var element = document.getElementById("resultText");
+	element.innerHTML = resultText;
+	element.style.color = resultColor;
 }
 
 function clearWord() {
@@ -243,6 +270,7 @@ function clearWordChecker() {
 function modalListener() {
 	const modal = document.getElementById("wordCheckerModal");
 	modal.addEventListener("hide.bs.modal", (event) => clearWordChecker());
+	modal.addEventListener("shown.bs.modal", (event) => onWordCheckerLoad());
 }
 
 function addListeners() {
@@ -277,6 +305,7 @@ function gridShakeSwitchListener() {
 		changeGridVars(switchElement)
 	);
 }
+
 function changeGridVars(switchElement) {
 	var switchShakingAudio = document.getElementById("switchShakingAudio");
 	if (switchElement.checked) {
@@ -289,3 +318,25 @@ function changeGridVars(switchElement) {
 		switchShakingAudio.disabled = true;
 	}
 }
+
+function onWordCheckerLoad() {
+	var input = document.getElementById("inputWord");
+	selectInput(input);
+	wordCheckerListener(input);
+}
+
+function selectInput(input) {
+	input.focus();
+	input.select();
+}
+
+function wordCheckerListener(input) {
+	//runs word checker on enter keypress
+	input.addEventListener("keypress", function (event) {
+		if (event.key === "Enter") {
+			event.preventDefault();
+			document.getElementById("btnCheckWord").click();
+		}
+	});
+}
+

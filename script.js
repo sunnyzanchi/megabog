@@ -1,17 +1,53 @@
 //global variables
 var continueTimer = true;
-var shakeSoundEnabled = { val: true };
-var timerSoundEnabled = { val: true };
-var gridShakeEnabled = { val: true };
-var darkModeEnabled = { val: false };
-var timerDisplayEnabled = { val: true };
+// var shakeSoundEnabled = { val: true };
+// var timerSoundEnabled = { val: true };
+// var gridShakeEnabled = { val: true };
+// var darkModeEnabled = { val: false };
+// var timerDisplayEnabled = { val: true };
+
+const options = {
+	shakeSoundEnabled: {
+		el: document.querySelector('#switchShakingAudio'),
+		value: true,
+		update: (option) => option.value = option.el.checked
+	},
+	timerSoundEnabled: {
+		el: '',
+		value: true,
+		update: (option) => option.value = option.el.checked
+	},
+	gridShakeEnabled: {
+		el: document.querySelector('#switchGridShake'),
+		value: true,
+		update: (option) => {
+			if (option.el.checked) {
+				option.value = true;
+				option.shakeSoundEnabled.value = false;
+				option.shakeSoundEnabled.el.disabled = false;
+			} else {
+				option.value = false;
+				option.shakeSoundEnabled.value = false;
+				switchShakingAudio.disabled = true;
+			}
+		}
+	},
+	darkModeEnabled: {
+		el: '',
+		value: true
+	},
+	timerDisplayEnabled: {
+		el: '',
+		value: true
+	},
+}
 
 function startTimer() {
 	var display = document.querySelector("#time");
 	var timer = 60 * 4,
 		minutes,
 		seconds;
-	var timerInterval = setInterval(function () {
+	var timerInterval = setInterval(function() {
 		if (!continueTimer) {
 			//stops timer if stop button has been pressed
 			display.textContent = "04:00";
@@ -157,7 +193,7 @@ function showGridShake() {
 	// Shuffles grid while sound plays
 	if (gridShakeEnabled.val) {
 		var id = window.setInterval(newGrid, 200);
-		window.setTimeout(function () {
+		window.setTimeout(function() {
 			window.clearInterval(id);
 		}, 1800);
 	}
@@ -276,47 +312,14 @@ function modalListener() {
 function addListeners() {
 	modalListener();
 	switchListeners();
-	gridShakeSwitchListener();
 }
 
 function switchListeners() {
-	const switchIDs = [
-		"switchShakingAudio",
-		"switchTimerAudio",
-		"switchDarkMode",
-	];
-
-	for (let i = 0; i < switchIDs.length; i++) {
-		let switchElement = document.getElementById(switchIDs[i]);
-		switchElement.addEventListener("change", (event) =>
-			changeVars(i, switchElement)
-		);
-	}
-}
-
-function changeVars(i, switchElement) {
-	var variables = [shakeSoundEnabled, timerSoundEnabled, darkModeEnabled];
-	variables[i].val = switchElement.checked;
-}
-
-function gridShakeSwitchListener() {
-	let switchElement = document.getElementById("switchGridShake");
-	switchElement.addEventListener("change", (event) =>
-		changeGridVars(switchElement)
-	);
-}
-
-function changeGridVars(switchElement) {
-	var switchShakingAudio = document.getElementById("switchShakingAudio");
-	if (switchElement.checked) {
-		gridShakeEnabled.val = true;
-		switchShakingAudio.disabled = false;
-		switchShakingAudio.checked = shakeSoundEnabled.val;
-	} else {
-		gridShakeEnabled.val = false;
-		switchShakingAudio.checked = false;
-		switchShakingAudio.disabled = true;
-	}
+	Object.values(options).forEach(option => {
+		option.el.addEventListener('change', () => {
+			option.value = option.update(option)
+		})
+	})
 }
 
 function onWordCheckerLoad() {
@@ -332,7 +335,7 @@ function selectInput(input) {
 
 function wordCheckerListener(input) {
 	//runs word checker on enter keypress
-	input.addEventListener("keypress", function (event) {
+	input.addEventListener("keypress", function(event) {
 		if (event.key === "Enter") {
 			event.preventDefault();
 			document.getElementById("btnCheckWord").click();

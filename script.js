@@ -6,18 +6,14 @@ var gridShakeEnabled = { val: true };
 var darkModeEnabled = { val: false };
 var timerDisplayEnabled = { val: true };
 
+let timerInterval;
+
 function startTimer() {
 	var display = document.querySelector("#time");
 	var timer = 60 * 4,
 		minutes,
 		seconds;
-	var timerInterval = setInterval(function () {
-		if (!continueTimer) {
-			//stops timer if stop button has been pressed
-			display.textContent = "04:00";
-			clearInterval(timerInterval);
-			return;
-		}
+	timerInterval = setInterval(function () {
 		// runs function every 1000ms to change timer display
 		minutes = parseInt(timer / 60, 10);
 		seconds = parseInt(timer % 60, 10);
@@ -178,7 +174,7 @@ function changeButton() {
 
 function stopGame() {
 	//clear timer
-	continueTimer = false;
+	clearInterval(timerInterval)
 	document.querySelector("#time").textContent = "04:00";
 
 	//clear grid

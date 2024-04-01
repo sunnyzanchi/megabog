@@ -1,10 +1,40 @@
 //global variables
-var continueTimer = true;
-var shakeSoundEnabled = { val: true };
-var timerSoundEnabled = { val: true };
-var gridShakeEnabled = { val: true };
-var darkModeEnabled = { val: false };
-var timerDisplayEnabled = { val: true };
+const options = {
+	shakeSoundEnabled: {
+		element: document.getElementById("switchShakingAudio"),
+		value: true,
+		update: (option) => (option.value = option.element.checked),
+	},
+	timerSoundEnabled: {
+		element: document.getElementById("switchTimerAudio"),
+		value: true,
+		update: (option) => (option.value = option.element.checked),
+	},
+	darkModeEnabled: {
+		element: document.getElementById("switchDarkMode"),
+		value: false,
+	},
+	gridShakeEnabled: {
+		element: document.getElementById("switchGridShake"),
+		value: true,
+		update: (option) => {
+			if (option.element.checked) {
+				option.value = true;
+				options.shakeSoundEnabled.element.disabled = false;
+				options.shakeSoundEnabled.element.checked =
+					options.shakeSoundEnabled.value;
+			} else {
+				option.value = false;
+				options.shakeSoundEnabled.element.checked = false;
+				options.shakeSoundEnabled.element.disabled = true;
+			}
+		},
+	},
+	timerDisplayEnabled: {
+		element: document.getElementById("switchTimerDisplay"),
+		value: true,
+	},
+};
 
 let timerInterval;
 
@@ -26,7 +56,7 @@ function startTimer() {
 		if (--timer < 0) {
 			//Stop after timer reaches 0
 			clearInterval(timerInterval);
-			if (timerSoundEnabled.val) {
+			if (options.timerSoundEnabled.value) {
 				playTimerSound();
 			}
 			changeButton();
@@ -122,7 +152,6 @@ function newGrid() {
 function fullScreen() {
 	//Makes grid full screen on button press
 	var grid = document.getElementById("gridholder");
-
 	grid.requestFullscreen();
 }
 
@@ -139,8 +168,7 @@ function playTimerSound() {
 }
 
 function play() {
-	continueTimer = true;
-	if (shakeSoundEnabled.val && gridShakeEnabled.val) {
+	if (options.shakeSoundEnabled.value && options.gridShakeEnabled.value) {
 		//prevents shake sound from playing if grid shaking is off
 		playShakeSound();
 	}
@@ -151,13 +179,31 @@ function play() {
 
 function showGridShake() {
 	// Shuffles grid while sound plays
-	if (gridShakeEnabled.val) {
+	if (options.gridShakeEnabled.value) {
 		var id = window.setInterval(newGrid, 200);
 		window.setTimeout(function () {
 			window.clearInterval(id);
 		}, 1800);
 	}
 	newGrid();
+}
+
+function stopGame() {
+	clearTimer();
+	clearGrid();
+	changeButton();
+}
+
+function clearTimer() {
+	clearInterval(timerInterval);
+	document.querySelector("#time").textContent = "04:00";
+}
+
+function clearGrid() {
+	for (var i = 0; i < 36; i++) {
+		var id = "tile" + i;
+		document.getElementById(id).textContent = "";
+	}
 }
 
 function changeButton() {
@@ -172,24 +218,10 @@ function changeButton() {
 	}
 }
 
-function stopGame() {
-	//clear timer
-	clearInterval(timerInterval)
-	document.querySelector("#time").textContent = "04:00";
-
-	//clear grid
-	for (var i = 0; i < 36; i++) {
-		var id = "tile" + i;
-		document.getElementById(id).textContent = "";
-	}
-	//change button back
-	changeButton();
-}
-
 function checkWord() {
 	var inputWord = document.getElementById("inputWord");
 	var word = inputWord.value;
-	if (!word.match("[a-z]{4,}")) {
+	if (!word.match("[a-zA-Z]{4,}")) {
 		// disallow words < 4 chars, spaces, apostrophes, and foreign characters
 		var resultText = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle" viewBox="0 0 16 16">
 		<path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
@@ -211,12 +243,12 @@ function callAPI(word) {
 
 	var response = fetch(apiURL, {
 		method: "GET",
-	}).then(function(response) {
+	}).then(function (response) {
 		if (response.status == 200) {
 			var resultText = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-circle" viewBox="0 0 16 16">
 			<path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
 			<path d="m10.97 4.97-.02.022-3.473 4.425-2.093-2.094a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-1.071-1.05"/>
-		  </svg> Word is a valid word.`;
+		  </svg> ${word} is a valid word.`;
 			var resultColor = "green";
 		} else if (response.status == 404) {
 			var resultText = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle" viewBox="0 0 16 16">
@@ -232,23 +264,6 @@ function callAPI(word) {
 		element.innerHTML = resultText;
 		element.style.color = resultColor;
 	});
-}
-
-//not used
-function parseResponse(response, word) {
-	if (response.status == 200) {
-		var resultText = `${word} is a valid word.`;
-		var resultColor = "green";
-	} else if (response.status == 404) {
-		var resultText = `${word} is not a valid word.`;
-		var resultColor = "red";
-	} else {
-		var resultText = `We encountered an error. Please try again`;
-		var resultColor = "red";
-	}
-	var element = document.getElementById("resultText");
-	element.innerHTML = resultText;
-	element.style.color = resultColor;
 }
 
 function clearWord() {
@@ -271,47 +286,14 @@ function modalListener() {
 function addListeners() {
 	modalListener();
 	switchListeners();
-	gridShakeSwitchListener();
 }
 
 function switchListeners() {
-	const switchIDs = [
-		"switchShakingAudio",
-		"switchTimerAudio",
-		"switchDarkMode",
-	];
-
-	for (let i = 0; i < switchIDs.length; i++) {
-		let switchElement = document.getElementById(switchIDs[i]);
-		switchElement.addEventListener("change", (event) =>
-			changeVars(i, switchElement)
-		);
-	}
-}
-
-function changeVars(i, switchElement) {
-	var variables = [shakeSoundEnabled, timerSoundEnabled, darkModeEnabled];
-	variables[i].val = switchElement.checked;
-}
-
-function gridShakeSwitchListener() {
-	let switchElement = document.getElementById("switchGridShake");
-	switchElement.addEventListener("change", (event) =>
-		changeGridVars(switchElement)
-	);
-}
-
-function changeGridVars(switchElement) {
-	var switchShakingAudio = document.getElementById("switchShakingAudio");
-	if (switchElement.checked) {
-		gridShakeEnabled.val = true;
-		switchShakingAudio.disabled = false;
-		switchShakingAudio.checked = shakeSoundEnabled.val;
-	} else {
-		gridShakeEnabled.val = false;
-		switchShakingAudio.checked = false;
-		switchShakingAudio.disabled = true;
-	}
+	Object.values(options).forEach((option) => {
+		option.element.addEventListener("change", () => {
+			option.update(option);
+		});
+	});
 }
 
 function onWordCheckerLoad() {
@@ -334,4 +316,3 @@ function wordCheckerListener(input) {
 		}
 	});
 }
-

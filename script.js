@@ -37,6 +37,7 @@ const options = {
 };
 
 let timerInterval;
+const wordCheckerResults = document.querySelector('#word-checker-results')
 
 function startTimer() {
 	var display = document.querySelector("#time");
@@ -219,6 +220,7 @@ function changeButton() {
 }
 
 function checkWord() {
+  clearDefinitions()
 	var inputWord = document.getElementById("inputWord");
 	var word = inputWord.value;
 	if (!word.match("[a-zA-Z]{4,}")) {
@@ -243,13 +245,17 @@ function callAPI(word) {
 
 	var response = fetch(apiURL, {
 		method: "GET",
-	}).then(function (response) {
+	}).then(async function (response) {
 		if (response.status == 200) {
 			var resultText = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-circle" viewBox="0 0 16 16">
 			<path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
 			<path d="m10.97 4.97-.02.022-3.473 4.425-2.093-2.094a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-1.071-1.05"/>
 		  </svg> ${word} is a valid word.`;
 			var resultColor = "green";
+			const json = await response.json()
+			const meanings = json.flatMap(entry => entry.meanings)
+			const renderedMeanings = meanings.map(renderMeaning)
+			wordCheckerResults.append(...renderedMeanings)
 		} else if (response.status == 404) {
 			var resultText = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle" viewBox="0 0 16 16">
 			<path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
@@ -272,6 +278,7 @@ function clearWord() {
 }
 
 function clearWordChecker() {
+  clearDefinitions()
 	clearWord();
 	var resultText = document.getElementById("resultText");
 	resultText.innerHTML = "";
@@ -316,3 +323,27 @@ function wordCheckerListener(input) {
 		}
 	});
 }
+
+const meaningTemplate = document.querySelector('#definition-template')
+const renderMeaning = (meaning) => {
+	const { partOfSpeech, definitions } = meaning
+
+	const view = meaningTemplate.content.cloneNode(true);
+	const partOfSpeechEl = view.querySelector('.part-of-speech')
+	const definitionsEl = view.querySelector('.definitions')
+	partOfSpeechEl.innerText = partOfSpeech
+	definitions.forEach(definition => {
+		const definitionEl = document.createElement('li')
+		definitionEl.innerText = definition.definition
+		definitionsEl.append(definitionEl)
+	})
+	
+	return view
+}
+
+const clearDefinitions = () => {
+  while (wordCheckerResults.lastElementChild) {
+    wordCheckerResults.removeChild(wordCheckerResults.lastElementChild);
+  }
+}
+

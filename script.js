@@ -218,7 +218,8 @@ function changeButton() {
 	}
 }
 
-function checkWord() {
+function checkWord(e) {
+  e.preventDefault()
 	var inputWord = document.getElementById("inputWord");
 	var word = inputWord.value;
 	if (!word.match("[a-zA-Z]{4,}")) {
@@ -307,12 +308,5 @@ function selectInput(input) {
 	input.select();
 }
 
-function wordCheckerListener(input) {
-	//runs word checker on enter keypress
-	input.addEventListener("keypress", function (event) {
-		if (event.key === "Enter") {
-			event.preventDefault();
-			document.getElementById("btnCheckWord").click();
-		}
-	});
-}
+const form = document.querySelector('form')
+form.addEventListener('submit', checkWord)
